@@ -100,32 +100,35 @@ Feature branch  ──► PR ──► master merge
                 messages        → commits back to master
 
               helm-test.yml   chart-release.yml
-              → helm lint     → if Chart.yaml version bumped:
-              → kubeconform     ① package chart .tgz
-                (k8s 1.28 +     ② create GitHub Release
-                 k8s 1.30)           balo-cricket-<ver>
-              → docker          ③ enrich release notes:
-                manifest            • bundled image versions
-                inspect             • upstream changelogs from
-                (both images)         balo-cricket-react-frontend-ui
-                                      balo-cricket-api
-                                ④ push index.yaml → gh-pages
-                                   (live Helm repo)
+              → helm lint     → ① auto-bump Chart.yaml version
+              → kubeconform        (conventional commits → semver)
+                (k8s 1.28 +     ② package chart .tgz
+                 k8s 1.30)      ③ create GitHub Release
+              → docker               balo-cricket-<ver>
+                manifest         ④ tag master: chart-v<ver>
+                inspect          ⑤ enrich release notes:
+                (both images)         • bundled image versions
+                                      • upstream changelogs from
+                                        balo-cricket-react-frontend-ui
+                                        balo-cricket-api
+                                  ⑥ push index.yaml → gh-pages
+                                     (live Helm repo)
 ```
 
-### Bumping the chart version
+### Automatic chart version bumping
 
-When you want to publish a new chart release, bump `version` in `helm/balo-cricket/Chart.yaml` **before** merging:
+`chart-release.yml` reads all conventional commits since the last `balo-cricket-*` tag and determines the semver bump automatically on every merge to `master`:
 
-```yaml
-# helm/balo-cricket/Chart.yaml
-version: 0.2.0    # ← increment this (semantic versioning)
-```
+| Commit type | Version bump |
+|-------------|--------------|
+| `BREAKING CHANGE` in body, or `feat!:` / `fix!:` etc. | **major** |
+| `feat:` | **minor** |
+| `fix:`, `helm:`, `chore:`, `ci:`, `docs:`, `refactor:`, `perf:`, `test:`, `style:`, `revert:` | **patch** |
 
-Commit it as:
+The bumped `Chart.yaml` is committed back to `master` with `[skip ci]` before `chart-releaser` runs, so no manual version bump is needed. A lightweight `chart-v<version>` tag is also created on `master` after each publish so you can check out exactly what was in the chart at any version:
 
 ```bash
-git commit -m "helm: bump chart version to 0.2.0"
+git checkout chart-v0.2.0
 ```
 
 `chart-release.yml` is idempotent — it only creates a GitHub Release when it finds a version that doesn't already have one.

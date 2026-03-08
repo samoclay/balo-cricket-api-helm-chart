@@ -3,18 +3,20 @@ name: Release Helm Chart
 # Runs automatically whenever a commit lands on master.
 #
 # What this workflow does on each run:
-#   1. Packages helm/balo-cricket and creates a versioned GitHub Release
+#   1. Auto-bumps `version` in helm/balo-cricket/Chart.yaml based on conventional
+#      commit types since the last balo-cricket-* tag:
+#        BREAKING CHANGE / feat!: → major  |  feat: → minor  |  everything else → patch
+#      The bumped Chart.yaml is committed back to master with [skip ci].
+#   2. Packages helm/balo-cricket and creates a versioned GitHub Release
 #      (only when Chart.yaml version has been incremented — idempotent).
-#   2. Pushes an updated index.yaml to the gh-pages branch so the repo
+#   3. Pushes an updated index.yaml to the gh-pages branch so the repo
 #      acts as a live Helm repository.
-#   3. Enriches the GitHub Release body with:
+#   4. Creates a lightweight `chart-v<version>` tag on master HEAD so you can
+#      check out exactly which image versions were bundled at any chart release.
+#   5. Enriches the GitHub Release body with:
 #        - The bundled frontend and API image versions
 #        - Upstream release notes fetched from each image's GitHub repo
 #        - A summary of conventional commits since the previous chart tag
-#
-# To publish a new chart version, bump `version` in helm/balo-cricket/Chart.yaml
-# before merging your feature branch, e.g.:
-#   helm: bump chart version to 0.2.0
 on:
   push:
     branches:
@@ -47,6 +49,59 @@ jobs:
         with:
           version: "v3.14.4"
 
+      # Determine the correct version bump from conventional commits since the
+      # last balo-cricket-* tag, update Chart.yaml, and push back to master.
+      # The [skip ci] suffix on the commit message prevents a recursive trigger.
+      - name: Auto-bump chart version from conventional commits
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          CURRENT_VERSION=$(grep '^version:' helm/balo-cricket/Chart.yaml | awk '{print $2}')
+
+          # Find the most recent balo-cricket-* tag (chart-releaser creates these)
+          LAST_TAG=$(git tag --list 'balo-cricket-*' --sort=-version:refname | head -n 1)
+
+          # Collect all commit messages (subject + body) since the last tag,
+          # or all commits when no tag exists yet.
+          if [ -n "$LAST_TAG" ]; then
+            COMMITS=$(git log "${LAST_TAG}..HEAD" --format="%B" 2>/dev/null || true)
+          else
+            COMMITS=$(git log --format="%B" 2>/dev/null || true)
+          fi
+
+          # Walk every line of the collected messages to find the highest bump.
+          BUMP="patch"
+          while IFS= read -r line; do
+            if echo "$line" | grep -qiE '(^|[[:space:]])BREAKING[[:space:]]+CHANGE' || \
+               echo "$line" | grep -qiE '^[a-zA-Z]+(\([^)]+\))?!:'; then
+              BUMP="major"
+              break
+            elif [ "$BUMP" != "major" ] && echo "$line" | grep -qE '^feat(\([^)]+\))?:'; then
+              BUMP="minor"
+            fi
+          done <<< "$COMMITS"
+
+          # Increment the appropriate version component in pure bash.
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT_VERSION"
+          if [ "$BUMP" = "major" ]; then
+            MAJOR=$((MAJOR + 1)); MINOR=0; PATCH=0
+          elif [ "$BUMP" = "minor" ]; then
+            MINOR=$((MINOR + 1)); PATCH=0
+          else
+            PATCH=$((PATCH + 1))
+          fi
+          NEW_VERSION="${MAJOR}.${MINOR}.${PATCH}"
+
+          echo "Bumping chart version: ${CURRENT_VERSION} → ${NEW_VERSION} (${BUMP})"
+
+          sed -i "s/^version: .*/version: ${NEW_VERSION}/" helm/balo-cricket/Chart.yaml
+
+          git add helm/balo-cricket/Chart.yaml
+          git commit -m "chore(helm): auto-bump chart version to ${NEW_VERSION} [skip ci]"
+          git pull --rebase origin master || { git rebase --abort; exit 1; }
+          git push
+
       # chart-releaser-action:
       #   1. Packages helm/balo-cricket into a .tgz
       #   2. Creates a GitHub Release tagged balo-cricket-<version>
@@ -77,6 +132,26 @@ jobs:
           git diff --staged --quiet || git commit -m "chore: add .nojekyll to disable Jekyll on gh-pages"
           git push origin gh-pages
           git checkout -
+
+      # Create a lightweight tag on the master HEAD commit so you can check out
+      # exactly which Chart.yaml (and therefore which image versions) were live at
+      # any given chart release.  This is separate from the balo-cricket-<version>
+      # tag that chart-releaser-action places on the packaged .tgz release asset.
+      - name: Tag master with chart version
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          CHART_VERSION=$(grep '^version:' helm/balo-cricket/Chart.yaml | awk '{print $2}')
+          TAG="chart-v${CHART_VERSION}"
+
+          if git ls-remote --tags origin "refs/tags/${TAG}" | grep -q .; then
+            echo "Tag ${TAG} already exists — skipping."
+          else
+            git tag "${TAG}" HEAD
+            git push origin "${TAG}"
+            echo "✅ Created and pushed tag ${TAG}"
+          fi
 
       # ---------------------------------------------------------------------------
       # Enrich the GitHub Release body with container image versions and the
