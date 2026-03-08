@@ -15,6 +15,67 @@ The priority chain used to source upstream notes for each service is:
 
 ---
 
+## ⛵ Balo Cricket Helm Chart — `0.1.1`
+
+Install or upgrade via the published Helm repository:
+
+```bash
+helm repo add balo-cricket https://samoclay.github.io/balo-cricket-api-helm-chart
+helm repo update
+helm upgrade --install balo-cricket balo-cricket/balo-cricket \
+  --version 0.1.1 \
+  --set api.secrets.jwtSecret=<your-jwt-secret> \
+  --set api.secrets.apiKey=<your-api-key>
+```
+
+---
+
+### 📦 Bundled container images
+
+| Service | Image | Version |
+|---------|-------|---------|
+| 🎨 **Frontend** | `ghcr.io/samoclay/balo-cricket-react-frontend-ui` | `latest` |
+| ⚙️ **API** | `ghcr.io/samoclay/balo-cricket-api` | `latest` |
+
+---
+
+### 🔄 What changed in this chart release
+
+- chore: bump chart version
+- chore: update RELEASE.md for chart 0.1.0 [skip ci]
+- chore: update CHANGELOG.md [skip ci]
+- fix: pull gh-pages after checkout to avoid overwriting index.yaml
+- chore: update RELEASE.md for chart 0.1.0 [skip ci]
+- chore: update CHANGELOG.md [skip ci]
+- fix: resolve helm repo 404 by fixing chart publishing workflow
+- chore: update RELEASE.md for chart 0.1.0 [skip ci]
+- chore: update CHANGELOG.md [skip ci]
+- ci: add workflow to publish helm chart to github pages
+- chore: update RELEASE.md for chart 0.1.0 [skip ci]
+- chore: update CHANGELOG.md [skip ci]
+- fix: add git pull --rebase origin master before push in chart-release workflow
+- chore: update CHANGELOG.md [skip ci]
+- chore: update CHANGELOG.md [skip ci]
+
+---
+
+### 🎨 Frontend — what's new in `latest`
+
+_No `RELEASE.md` or GitHub Release found for tag `latest` in [samoclay/balo-cricket-react-frontend-ui](https://github.com/samoclay/balo-cricket-react-frontend-ui). Release notes will appear here once the upstream repo publishes them._
+
+---
+
+### ⚙️ API — what's new in `latest`
+
+_No `RELEASE.md` or GitHub Release found for tag `latest` in [samoclay/balo-cricket-api](https://github.com/samoclay/balo-cricket-api). Release notes will appear here once the upstream repo publishes them._
+
+---
+
+> 📋 Full commit history: [CHANGELOG.md](https://github.com/samoclay/balo-cricket-api-helm-chart/blob/master/CHANGELOG.md)
+
+
+---
+
 ## ⛵ Balo Cricket Helm Chart — `0.1.0`
 
 Install or upgrade via the published Helm repository:
@@ -73,4 +134,3 @@ _No `RELEASE.md` or GitHub Release found for tag `latest` in [samoclay/balo-cric
 ---
 
 > 📋 Full commit history: [CHANGELOG.md](https://github.com/samoclay/balo-cricket-api-helm-chart/blob/master/CHANGELOG.md)
-
