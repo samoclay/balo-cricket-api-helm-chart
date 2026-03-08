@@ -10,7 +10,10 @@ All notable changes to this project are documented here.Entries are auto-generat
 ### 🐛 Bug Fixes
 - Add git pull --rebase origin master before push in chart-release workflow ([`8d51db4`](https://github.com/samoclay/balo-cricket-api-helm-chart/commit/8d51db45568a943bc911bc42ca1507fbfed4a357))- Use .mjs commitlint config for wagoid v6 compatibility, add continue-on-error for cross-repo image checks ([`84da586`](https://github.com/samoclay/balo-cricket-api-helm-chart/commit/84da5867c270a49d24cdbcd8cfb3c7ee6dbe73c4))- Resolve failing CI checks — JS commitlint config with ignores, GHCR uses GITHUB_TOKEN ([`e2e7cbf`](https://github.com/samoclay/balo-cricket-api-helm-chart/commit/e2e7cbf762c9a6e6913d6a14c4bf00562eba8eb0))
 
+### 👷 CI/CD
+- Add workflow to publish helm chart to github pages ([`92f0ead`](https://github.com/samoclay/balo-cricket-api-helm-chart/commit/92f0ead1714cdbf057c251876d322e8d102f79b5))
+
 ### 🔧 Chores
-- Update CHANGELOG.md [skip ci] ([`e537951`](https://github.com/samoclay/balo-cricket-api-helm-chart/commit/e537951b351631bf8e5bc036564aa91e3201ff6c))- Update CHANGELOG.md [skip ci] ([`2d5687b`](https://github.com/samoclay/balo-cricket-api-helm-chart/commit/2d5687be1818d2d1b94b7175584bb28875340ad1))
+- Update RELEASE.md for chart 0.1.0 [skip ci] ([`c69e4b4`](https://github.com/samoclay/balo-cricket-api-helm-chart/commit/c69e4b48aeab6a1f1cc290e51f2b76890d8dc6a4))- Update CHANGELOG.md [skip ci] ([`efc8c9f`](https://github.com/samoclay/balo-cricket-api-helm-chart/commit/efc8c9febaa848315b8c151acf8b7dc012fc9afd))- Update CHANGELOG.md [skip ci] ([`e537951`](https://github.com/samoclay/balo-cricket-api-helm-chart/commit/e537951b351631bf8e5bc036564aa91e3201ff6c))- Update CHANGELOG.md [skip ci] ([`2d5687b`](https://github.com/samoclay/balo-cricket-api-helm-chart/commit/2d5687be1818d2d1b94b7175584bb28875340ad1))
 
 
