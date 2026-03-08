@@ -39,7 +39,7 @@ jobs:
       - name: Validate commit messages
         uses: wagoid/commitlint-github-action@v6
         with:
-          configFile: .commitlintrc.js
+          configFile: .commitlintrc.mjs
           # Check every commit in the PR, not just the latest
           failOnWarnings: false
           helpURL: "https://www.conventionalcommits.org/"
