@@ -172,6 +172,72 @@ kubectl delete namespace balo-cricket
 
 ---
 
+## 🍺 Local Helm setup on macOS
+
+### Prerequisites on macOS (using Homebrew)
+
+1. **Install Homebrew** (if not already installed):
+   ```bash
+   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+   ```
+
+2. **Install Helm** via Homebrew:
+   ```bash
+   brew install helm
+   ```
+
+3. **Install kubectl** via Homebrew:
+   ```bash
+   brew install kubectl
+   ```
+
+4. **Install Docker Desktop** with Kubernetes enabled — [download](https://www.docker.com/products/docker-desktop/)
+
+5. **Enable Kubernetes in Docker Desktop** — open Docker Desktop → Settings → Kubernetes → tick **Enable Kubernetes** → Apply & Restart
+
+6. **Verify the setup**:
+   ```bash
+   kubectl cluster-info
+   helm version
+   ```
+
+### Add and use the published Helm repo on macOS
+
+> **Note:** The GitHub Pages source for this repo must be set to **"GitHub Actions"** (Settings → Pages → Source → GitHub Actions) for `index.yaml` to be served correctly. If you see 404s, check this setting first.
+
+```bash
+# Add the Helm repo
+helm repo add balo-cricket https://samoclay.github.io/balo-cricket-api-helm-chart
+helm repo update
+
+# Verify it's available
+helm search repo balo-cricket
+
+# Install the chart
+helm install balo-cricket balo-cricket/balo-cricket \
+  --namespace balo-cricket --create-namespace \
+  --set api.secrets.jwtSecret=<your-jwt-secret> \
+  --set api.secrets.apiKey=<your-api-key>
+
+# Check pods are running
+kubectl get pods -n balo-cricket
+
+# Access the frontend (via port-forward if no ingress)
+kubectl port-forward svc/balo-cricket-frontend 8080:80 -n balo-cricket
+```
+
+### Troubleshooting on macOS
+
+- **`helm repo add` fails** — ensure Pages is deployed and `index.yaml` is accessible at `https://samoclay.github.io/balo-cricket-api-helm-chart/index.yaml`. The repo's Pages source must be set to **"GitHub Actions"** in Settings → Pages.
+- **Pods in `ImagePullBackOff`** — GHCR images are public, but if pulling fails run `docker login ghcr.io`.
+- **Apple Silicon (M1/M2/M3)** — Docker Desktop supports multi-arch images; both images are built for `linux/amd64` and `linux/arm64`.
+- **Uninstall**:
+  ```bash
+  helm uninstall balo-cricket -n balo-cricket && kubectl delete namespace balo-cricket
+  ```
+
+---
+
 ## 📝 Contributing — Conventional Commits
 
 Every commit must follow the [Conventional Commits](https://www.conventionalcommits.org/) format. The `commitlint.yml` workflow enforces this on every PR.
