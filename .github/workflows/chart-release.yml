@@ -74,19 +74,36 @@ jobs:
       - name: Install Python dependencies
         run: pip install pyyaml
 
+      - name: Read chart version
+        id: chart
+        run: |
+          CHART_VERSION=$(python3 -c \
+            "import yaml; print(yaml.safe_load(open('helm/balo-cricket/Chart.yaml'))['version'])")
+          echo "version=${CHART_VERSION}" >> "$GITHUB_OUTPUT"
+
       - name: Build enriched release notes
         run: python3 scripts/enrich-release.py
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_REPOSITORY: ${{ github.repository }}
 
+      - name: Commit RELEASE.md back to master
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add RELEASE.md
+          if git diff --staged --quiet; then
+            echo "RELEASE.md is already up-to-date — nothing to commit."
+          else
+            git commit -m "chore: update RELEASE.md for chart ${{ steps.chart.outputs.version }} [skip ci]"
+            git push
+          fi
+
       - name: Update GitHub Release with enriched notes
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          CHART_VERSION=$(python3 -c \
-            "import yaml; print(yaml.safe_load(open('helm/balo-cricket/Chart.yaml'))['version'])")
-          RELEASE_TAG="balo-cricket-${CHART_VERSION}"
+          RELEASE_TAG="balo-cricket-${{ steps.chart.outputs.version }}"
 
           if gh release view "${RELEASE_TAG}" --repo "${{ github.repository }}" &>/dev/null; then
             gh release edit "${RELEASE_TAG}" \
