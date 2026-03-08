@@ -26,10 +26,19 @@ jobs:
     name: Package & Publish Chart
     runs-on: ubuntu-latest
 
-    # chart-releaser needs to create GitHub Releases and push to gh-pages
+    # chart-releaser needs to create GitHub Releases and push to gh-pages.
+    # pages: write + id-token: write are required by actions/deploy-pages to
+    # deploy via the Pages API (GITHUB_TOKEN git-pushes to gh-pages do NOT
+    # trigger a Pages build — the deploy-pages action is required instead).
     permissions:
       contents: write
       pages: write
+      id-token: write
+
+    # Wire up the Pages deployment URL in the GitHub UI
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
 
     steps:
       - name: Checkout (full history required by chart-releaser)
@@ -60,24 +69,28 @@ jobs:
           charts_dir: helm
           skip_existing: true
 
-      - name: Add .nojekyll to gh-pages branch
+      # NOTE: GitHub has a known limitation — commits pushed to gh-pages via
+      # GITHUB_TOKEN do NOT trigger a Pages build/deployment. To work around
+      # this we use the official Pages deployment API (upload-pages-artifact +
+      # deploy-pages) instead of a direct git push.
+      #
+      # The repo's GitHub Pages source MUST be set to "GitHub Actions"
+      # (Settings → Pages → Source → GitHub Actions) for this to work.
+      - name: Checkout gh-pages content for Pages deployment
         run: |
-          git config user.name  "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          if git ls-remote --exit-code origin gh-pages; then
-            git fetch origin gh-pages
-            git checkout gh-pages
-            git pull origin gh-pages
-          else
-            echo "gh-pages branch does not exist yet; creating orphan branch"
-            git checkout --orphan gh-pages
-            git rm -rf .
-          fi
-          touch .nojekyll
-          git add .nojekyll
-          git diff --staged --quiet || git commit -m "chore: add .nojekyll to disable Jekyll on gh-pages"
-          git push origin gh-pages
-          git checkout -
+          git fetch origin gh-pages
+          mkdir -p /tmp/gh-pages-deploy
+          git --work-tree=/tmp/gh-pages-deploy checkout origin/gh-pages -- .
+          touch /tmp/gh-pages-deploy/.nojekyll
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: /tmp/gh-pages-deploy
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
 
       # ---------------------------------------------------------------------------
       # Enrich the GitHub Release body with container image versions and the
