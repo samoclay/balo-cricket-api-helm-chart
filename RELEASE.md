@@ -41,6 +41,9 @@ helm upgrade --install balo-cricket balo-cricket/balo-cricket \
 
 ### 🔄 What changed in this chart release
 
+- fix: pull gh-pages after checkout to avoid overwriting index.yaml
+- chore: update RELEASE.md for chart 0.1.0 [skip ci]
+- chore: update CHANGELOG.md [skip ci]
 - fix: resolve helm repo 404 by fixing chart publishing workflow
 - chore: update RELEASE.md for chart 0.1.0 [skip ci]
 - chore: update CHANGELOG.md [skip ci]
