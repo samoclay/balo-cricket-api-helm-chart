@@ -10,4 +10,7 @@ All notable changes to this project are documented here.Entries are auto-generat
 ### 🐛 Bug Fixes
 - Use .mjs commitlint config for wagoid v6 compatibility, add continue-on-error for cross-repo image checks ([`84da586`](https://github.com/samoclay/balo-cricket-api-helm-chart/commit/84da5867c270a49d24cdbcd8cfb3c7ee6dbe73c4))- Resolve failing CI checks — JS commitlint config with ignores, GHCR uses GITHUB_TOKEN ([`e2e7cbf`](https://github.com/samoclay/balo-cricket-api-helm-chart/commit/e2e7cbf762c9a6e6913d6a14c4bf00562eba8eb0))
 
+### 🔧 Chores
+- Update CHANGELOG.md [skip ci] ([`2d5687b`](https://github.com/samoclay/balo-cricket-api-helm-chart/commit/2d5687be1818d2d1b94b7175584bb28875340ad1))
+
 
