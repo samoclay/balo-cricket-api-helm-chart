@@ -41,6 +41,11 @@ helm upgrade --install balo-cricket balo-cricket/balo-cricket \
 
 ### 🔄 What changed in this chart release
 
+- chore: commiting release back to master
+- chore: update CHANGELOG.md [skip ci]
+- ci: fix Pages deployment via deploy-pages action + add macOS Helm setup docs
+- chore: update RELEASE.md for chart 0.1.1 [skip ci]
+- chore: update CHANGELOG.md [skip ci]
 - chore: bump chart version
 - chore: update RELEASE.md for chart 0.1.0 [skip ci]
 - chore: update CHANGELOG.md [skip ci]
