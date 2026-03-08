@@ -41,6 +41,9 @@ helm upgrade --install balo-cricket balo-cricket/balo-cricket \
 
 ### 🔄 What changed in this chart release
 
+- ci: add workflow to publish helm chart to github pages
+- chore: update RELEASE.md for chart 0.1.0 [skip ci]
+- chore: update CHANGELOG.md [skip ci]
 - fix: add git pull --rebase origin master before push in chart-release workflow
 - chore: update CHANGELOG.md [skip ci]
 - chore: update CHANGELOG.md [skip ci]
